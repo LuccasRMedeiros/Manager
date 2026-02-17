@@ -1,0 +1,67 @@
+#! /bin/bash
+
+mngr_help() {
+	echo -e "\
+This script is a helper to execute some basic tasks in the project construction. \
+Call it with one or many of the following options:\n\n\
+	-h | --help     Show this help message.\n\
+	-b | --build    Builds the project using the default settings.\n\
+	-t | --tag      Generate the tags file for the project using the \"ctags\"\
+command and excluding directories that are not relevant for tagging\n\
+	-c | --clear    Remove build and other artifacts\n\n\
+The \"Manager\" runs each given argument in order, and do it until reach the end 
+of the list. Each following argument is not seem by the previous, and none of 
+them have relation of dependencies, turning the outcome of the chain a responsability 
+of the user!"
+}
+
+mngr_tag() {
+	ctags -R --languages=C,C++ --exclude=.ccls-cache --exclude=build .
+}
+
+mngr_build() {
+	mkdir -p build && cd build  
+	cmake -DPROJ_NAME=Generic -DPROJ_VER=0 -DCMAKE_BUILD_TYPE=Debug .. \
+		&& make -j12 \
+		&& echo "Finished project building"
+	cd ..
+
+	if [ ! -f compile_commands.json ]; then
+		ln -s build/compile_commands.json .
+	fi
+
+	mngr_tag
+}
+
+mngr_clean() {
+	rm -rf build 
+	rm -rf .ccls-cache 
+	rm -f compile_commands.json
+	rm -f tags
+	rm -f Generic
+	echo "Removed all build artifacts"
+}
+
+while [[ $# -gt 0 ]]; do 
+	case $1 in
+		"-b" | "--build" )
+			mngr_build
+			;;
+		"-t" | "--tag" )
+			mngr_tag
+			;;
+		"-c" | "--clean" )
+			mngr_clean
+			;;
+		"-h" | "--help" )
+			mngr_help
+			;;
+		* )
+			echo "Option not recognized: ${1}"
+			echo "Use \"--help\" \(or just \"-h\"\) to see available options"
+			echo "This will be ignored"
+			;;
+	esac
+
+	shift
+done
