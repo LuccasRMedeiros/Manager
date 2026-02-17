@@ -6,18 +6,21 @@
 static const char *classify(char *str)
 {
 	size_t strlength = strlen(str);
+	size_t ch = 0;
 	int isnegative = 0;
 
 	if (str[0] == '-')
-		isnegative = 1;
-
-	for (size_t ch = 0; ch < strlength; ++ch)
 	{
-		if (isnegative)
-			continue;
+		isnegative = 1;
+		ch = 1;
+	}
 
+	while (ch < strlength)
+	{
 		if (!isdigit(str[ch]))
 			return "String";
+
+		++ch;
 	}
 
 	if (isnegative)
