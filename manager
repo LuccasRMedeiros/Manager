@@ -2,6 +2,7 @@
 
 mngr_help() {
 	echo -e "\
+Usage: manager <-b> <-c> <-th> ...\n\
 This script is a helper to execute some basic tasks in the project construction. \
 Call it with one or many of the following options:\n\n\
 	-h | --help     Show this help message.\n\
