@@ -16,11 +16,11 @@ them have relation of dependencies, turning the outcome of the chain a responsab
 of the user!"
 }
 
-mngr_tag() {
+mngr_tag(){
 	ctags -R --languages=C,C++ --exclude=.ccls-cache --exclude=build .
 }
 
-mngr_build() {
+mngr_build(){
 	mkdir -p build && cd build  
 	cmake -DPROJ_NAME=Generic -DPROJ_VER=0 -DCMAKE_BUILD_TYPE=Debug .. \
 		&& make -j12 \
@@ -34,13 +34,21 @@ mngr_build() {
 	mngr_tag
 }
 
-mngr_clean() {
+mngr_clean(){
 	rm -rf build 
 	rm -rf .ccls-cache 
 	rm -f compile_commands.json
 	rm -f tags
 	rm -f Generic
 	echo "Removed all build artifacts"
+}
+
+mngr_start(){
+	echo -e "\
+PROJ_NAME=${2}
+PROJ_VER=0
+OUTPUT_TO=./
+" > proj_settings.sh
 }
 
 while [[ $# -gt 0 ]]; do 
@@ -53,6 +61,78 @@ while [[ $# -gt 0 ]]; do
 			;;
 		"-c" | "--clean" )
 			mngr_clean
+			;;
+		"-s" | "--start" )
+			NAME=""
+			VERSION=""
+			OUT=""
+
+			while [[ -v $2 && -z $NAME || -z $VERSION || -z $OUT ]]; do
+	
+				if [[ -v $2 &&
+					$2 != "-b" && $2 != "--build" && 
+					$2 != "-t" && $2 != "--tag" && 
+					$2 != "-c" && $2 != "--clean" && 
+					$2 != "-s" && $2 != "--start" && 
+					$2 != "-h" && $2 != "--help" ]]; then
+	
+					if [[ $2 == "--name" ]]; then
+						shift
+	
+						if [[$2 != "-b" && $2 != "--build" && 
+							$2 != "-t" && $2 != "--tag" && 
+							$2 != "-c" && $2 != "--clean" && 
+							$2 != "-s" && $2 != "--start" && 
+							$2 != "-h" && $2 != "--help" && 
+							$2 != "--version" && $2 != "--out" ]]; then
+							NAME=$2
+							shift
+						fi
+					elif [[ $2 == "--version" ]]; then
+						shift
+						
+						if [[$2 != "-b" && $2 != "--build" && 
+							$2 != "-t" && $2 != "--tag" && 
+							$2 != "-c" && $2 != "--clean" && 
+							$2 != "-s" && $2 != "--start" && 
+							$2 != "-h" && $2 != "--help" && 
+							$2 != "--name" && $2 != "--out" ]]; then
+							VERSION=$2
+							shift
+						fi
+					elif [[ $2 == "--out" ]]; then
+						shift
+						
+						if [[$2 != "-b" && $2 != "--build" && 
+							$2 != "-t" && $2 != "--tag" && 
+							$2 != "-c" && $2 != "--clean" && 
+							$2 != "-s" && $2 != "--start" && 
+							$2 != "-h" && $2 != "--help" && 
+							$2 != "--version" && $2 != "--name" ]]; then
+							OUT=$2
+							shift
+						fi
+					elif [ -z $NAME ]; then
+						NAME=$2
+						shift
+					elif [ -z $VERSION ]; then
+						VERSION=$2
+						shift
+					elif [ -z $OUT ]; then
+						OUT=$2
+						shift
+					fi 
+				fi
+				if [ -z $NAME ]; then
+					NAME="Generic"
+				elif [ -z $VERSION ]; then
+					VERSION=0
+				elif [ -z $OUT ]; then
+					OUT=./
+				fi
+			done
+			
+			mngr_start $@
 			;;
 		"-h" | "--help" )
 			mngr_help
