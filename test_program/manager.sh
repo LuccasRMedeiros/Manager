@@ -44,6 +44,49 @@ mngr_clean(){
 }
 
 mngr_start(){
+	NAME=""
+	VERSION=""
+	OUT=""
+
+	while [[ -z $NAME || -z $VERSION || -z $OUT ]]; do
+	
+		if [[ -v $2 &&
+			$2 != "-b" && $2 != "--build" && 
+			$2 != "-t" && $2 != "--tag" && 
+			$2 != "-c" && $2 != "--clean" && 
+			$2 != "-s" && $2 != "--start" && 
+			$2 != "-h" && $2 != "--help" ]]; then
+	
+			if [[ ${2:0:7} == "--name=" ]]; then
+				NAME=${2:7}
+				shift
+			elif [[ ${2:0:10} == "--version=" ]]; then
+				VERSION=${2:10}
+				shift
+			elif [[ ${2:0:6} == "--out=" ]]; then
+				OUT=${2:6}
+				shift
+			elif [ -z $NAME ]; then
+				NAME=$2
+				shift
+			elif [ -z $VERSION ]; then
+				VERSION=$2
+				shift
+			elif [ -z $OUT ]; then
+				OUT=$2
+				shift
+			fi 
+		fi
+
+		if [ -z $NAME ]; then
+			NAME="Generic"
+		elif [ -z $VERSION ]; then
+			VERSION="0"
+		elif [ -z $OUT ]; then
+			OUT="./"
+		fi
+	done
+	
 	echo -e "\
 PROJ_NAME=${2}
 PROJ_VER=0
@@ -63,75 +106,6 @@ while [[ $# -gt 0 ]]; do
 			mngr_clean
 			;;
 		"-s" | "--start" )
-			NAME=""
-			VERSION=""
-			OUT=""
-
-			while [[ -v $2 && -z $NAME || -z $VERSION || -z $OUT ]]; do
-	
-				if [[ -v $2 &&
-					$2 != "-b" && $2 != "--build" && 
-					$2 != "-t" && $2 != "--tag" && 
-					$2 != "-c" && $2 != "--clean" && 
-					$2 != "-s" && $2 != "--start" && 
-					$2 != "-h" && $2 != "--help" ]]; then
-	
-					if [[ $2 == "--name" ]]; then
-						shift
-	
-						if [[$2 != "-b" && $2 != "--build" && 
-							$2 != "-t" && $2 != "--tag" && 
-							$2 != "-c" && $2 != "--clean" && 
-							$2 != "-s" && $2 != "--start" && 
-							$2 != "-h" && $2 != "--help" && 
-							$2 != "--version" && $2 != "--out" ]]; then
-							NAME=$2
-							shift
-						fi
-					elif [[ $2 == "--version" ]]; then
-						shift
-						
-						if [[$2 != "-b" && $2 != "--build" && 
-							$2 != "-t" && $2 != "--tag" && 
-							$2 != "-c" && $2 != "--clean" && 
-							$2 != "-s" && $2 != "--start" && 
-							$2 != "-h" && $2 != "--help" && 
-							$2 != "--name" && $2 != "--out" ]]; then
-							VERSION=$2
-							shift
-						fi
-					elif [[ $2 == "--out" ]]; then
-						shift
-						
-						if [[$2 != "-b" && $2 != "--build" && 
-							$2 != "-t" && $2 != "--tag" && 
-							$2 != "-c" && $2 != "--clean" && 
-							$2 != "-s" && $2 != "--start" && 
-							$2 != "-h" && $2 != "--help" && 
-							$2 != "--version" && $2 != "--name" ]]; then
-							OUT=$2
-							shift
-						fi
-					elif [ -z $NAME ]; then
-						NAME=$2
-						shift
-					elif [ -z $VERSION ]; then
-						VERSION=$2
-						shift
-					elif [ -z $OUT ]; then
-						OUT=$2
-						shift
-					fi 
-				fi
-				if [ -z $NAME ]; then
-					NAME="Generic"
-				elif [ -z $VERSION ]; then
-					VERSION=0
-				elif [ -z $OUT ]; then
-					OUT=./
-				fi
-			done
-			
 			mngr_start $@
 			;;
 		"-h" | "--help" )
