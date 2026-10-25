@@ -56,10 +56,15 @@ static void mngr_startproj(char *sargv)
 			<< "#endif // __MAIN_H__" << endl;
 		incfile.close();
 	}
-	catch (fstream::failure err)
+	catch (filesystem::filesystem_error fserr)
 	{
-		cerr << "Failed to start project, exception: " << err.code() << endl 
-			<< err.what() << endl;
+		cerr << "Could not create the directories: " << fserr.code() << endl 
+			<< fserr.what() << endl;
+	}
+	catch (fstream::failure flerr)
+	{
+		cerr << "Could not create a file: " << flerr.code() << endl 
+			<< flerr.what() << endl;
 	}
 }
 
